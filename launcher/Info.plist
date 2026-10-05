@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>CFBundleIdentifier</key><string>com.carson.jarvis-launch</string>
+  <key>CFBundleName</key><string>Jarvis</string>
+  <key>NSCalendarsFullAccessUsageDescription</key><string>Jarvis reads your calendar to spot conflicts and adds events you dictate.</string>
+  <key>NSCalendarsUsageDescription</key><string>Jarvis reads your calendar to spot conflicts and adds events you dictate.</string>
+  <key>NSRemindersFullAccessUsageDescription</key><string>Jarvis adds reminders you dictate.</string>
+  <key>NSAppleEventsUsageDescription</key><string>Jarvis creates reminders and shows notifications.</string>
+</dict></plist>

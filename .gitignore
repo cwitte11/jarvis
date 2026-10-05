@@ -1,0 +1,20 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Jarvis HUD is its own repo
+hud/
+
+# Personal runtime data — not source
+*.jsonl
+state.json
+logs/
+backups/
+.DS_Store
