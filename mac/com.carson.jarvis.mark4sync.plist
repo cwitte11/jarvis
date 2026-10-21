@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>Label</key><string>com.carson.jarvis.mark4sync</string>
+  <key>ProgramArguments</key><array>
+    <string>/Users/carsonwitte/jarvis/bin/jarvis-launch</string>
+    <string>/Users/carsonwitte/jarvis/.venv/bin/python</string>
+    <string>/Users/carsonwitte/jarvis/mac/jarvis_sync.py</string>
+  </array>
+  <key>StartInterval</key><integer>300</integer>
+  <key>RunAtLoad</key><true/>
+  <key>StandardErrorPath</key><string>/Users/carsonwitte/jarvis/logs/mark4-sync.err</string>
+</dict></plist>
