@@ -24,16 +24,34 @@ def _client():
                             password=os.environ["ICLOUD_APP_PASSWORD"])
 
 
+# Mark 2's personal Home calendar ID (from EventKit). Used to pick the right "Home" if the
+# CalDAV address happens to contain it. Otherwise set ICLOUD_CALENDAR_URL from /admin/calendars.
+PERSONAL_ID = os.environ.get("ICLOUD_CALENDAR_ID", "A0F6B145-7A6A-469A-9DD3-D7C2D2DEC62A")
+
+
+def _pick(calendars) -> object | None:
+    url = os.environ.get("ICLOUD_CALENDAR_URL")
+    for c in calendars:
+        if url and str(c.url).rstrip("/") == url.rstrip("/"):
+            return c
+    if not url:
+        for c in calendars:
+            if PERSONAL_ID.lower() in str(c.url).lower():
+                return c
+    return None
+
+
 def list_calendars() -> list[dict]:
-    principal = _client().principal()
-    return [{"name": c.name, "url": str(c.url)} for c in principal.calendars()]
+    cals = _client().principal().calendars()
+    chosen = _pick(cals)
+    return [{"name": c.name, "url": str(c.url), "using": c is chosen} for c in cals]
 
 
 def _calendar():
-    url = os.environ.get("ICLOUD_CALENDAR_URL")
-    if not url:
-        raise RuntimeError("ICLOUD_CALENDAR_URL not set. Pick one from /admin/calendars.")
-    return _client().calendar(url=url)
+    chosen = _pick(_client().principal().calendars())
+    if chosen is None:
+        raise RuntimeError("No calendar picked yet. Set ICLOUD_CALENDAR_URL from /admin/calendars.")
+    return chosen
 
 
 def _local(dt) -> tuple[datetime, bool]:
