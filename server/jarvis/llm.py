@@ -47,6 +47,7 @@ def _record_cost(model: str, usage) -> None:
 
 
 def _call(model: str, system: str, prompt: str, schema: dict, max_tokens: int = 600) -> dict:
+    max_tokens = max(max_tokens, 2000)  # room to think first; billing is on what's actually written
     """Asks for JSON that matches the schema (structured outputs), so the reply is always the shape we asked for.
 
     Forced tool use isn't supported on the newest models, so this uses output_config instead.
@@ -58,11 +59,14 @@ def _call(model: str, system: str, prompt: str, schema: dict, max_tokens: int = 
     )
     _record_cost(model, msg.usage)
     if msg.stop_reason in ("refusal", "max_tokens"):
-        raise RuntimeError(f"Claude stopped early: {msg.stop_reason}")
+        raise RuntimeError(f"Claude stopped early: {msg.stop_reason}, blocks={[b.type for b in msg.content]}")
     text = next((b.text for b in msg.content if b.type == "text"), None)
     if text is None:
-        raise RuntimeError("Claude gave no reply")
-    return json.loads(text)
+        raise RuntimeError(f"Claude gave no text, blocks={[b.type for b in msg.content]}")
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as e:
+        raise RuntimeError(f"Claude reply wasn't JSON: {text[:200]!r}") from e
 
 
 def _when_line(t: datetime) -> str:

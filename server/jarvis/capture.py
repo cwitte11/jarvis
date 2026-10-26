@@ -1,11 +1,13 @@
 """One spoken sentence in, one action out. Jev sorts it, Claude fills in the details."""
 
+import logging
 import time
 from datetime import datetime, timedelta
 
 from . import db, icloud, jev, llm
 from .clock import default_due, now, spoken
 
+log = logging.getLogger("jarvis")
 JEV_SURE = 0.35  # below this, Claude double-checks Jev's pick
 WHEN_FORMAT = "%Y-%m-%d %H:%M"
 
@@ -86,6 +88,7 @@ def handle(text: str) -> dict:
     try:
         say = HANDLERS.get(kind, _note)(text)
     except Exception as e:
+        log.exception("capture failed (%s): %r", kind, text)
         # Never lose his words. Park them for the Mac to drop in the inbox.
         db.queue("note", {"text": text, "at": db.iso(now()), "error": str(e)[:200]})
         say = "Something broke on my end. I saved what you said to your inbox."

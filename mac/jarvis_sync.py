@@ -79,7 +79,7 @@ def write_note(item: dict) -> None:
     at = datetime.fromisoformat(item["at"]) if item.get("at") else datetime.now()
     stamp = at.strftime("%A, %B %-d, %Y at %-I:%M %p")
     text = item["text"].replace("\n", " ")
-    flag = " (Jarvis had an error, sort this one by hand)" if item.get("error") else ""
+    flag = f" (Jarvis had an error, sort this one by hand: {item['error'][:120]})" if item.get("error") else ""
     existing = INBOX.read_text() if INBOX.exists() else ""
     sep = "" if not existing or existing.endswith("\n") else "\n"
     with INBOX.open("a") as f:
