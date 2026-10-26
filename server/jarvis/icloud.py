@@ -41,10 +41,22 @@ def _pick(calendars) -> object | None:
     return None
 
 
-def list_calendars() -> list[dict]:
+def list_calendars(peek: bool = False) -> list[dict]:
+    """With peek, also shows the next few event titles so the right "Home" is easy to spot."""
     cals = _client().principal().calendars()
     chosen = _pick(cals)
-    return [{"name": c.name, "url": str(c.url), "using": c is chosen} for c in cals]
+    out = []
+    for c in cals:
+        row = {"name": c.name, "url": str(c.url), "using": c is chosen}
+        if peek:
+            try:
+                now = datetime.now(TZ)
+                found = c.search(start=now - timedelta(days=30), end=now + timedelta(days=30), event=True, expand=True)
+                row["sample_events"] = [str(e.icalendar_component.get("summary", "")) for e in found][:4]
+            except Exception as e:
+                row["sample_events"] = [f"(couldn't read: {e})"]
+        out.append(row)
+    return out
 
 
 def _calendar():

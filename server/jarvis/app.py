@@ -110,8 +110,8 @@ def post_tick():
 
 
 @app.get("/admin/calendars", dependencies=[Depends(auth)])
-def admin_calendars():
-    return icloud.list_calendars()
+def admin_calendars(peek: bool = False):
+    return icloud.list_calendars(peek)
 
 
 @app.get("/admin/costs", dependencies=[Depends(auth)])
