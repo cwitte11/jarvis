@@ -50,6 +50,7 @@ async def _loop():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     db.connect().close()
+    db.set_meta("brief_failed", None)  # a fresh start retries the brief right away
     task = asyncio.create_task(_loop())
     yield
     task.cancel()

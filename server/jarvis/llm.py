@@ -4,6 +4,7 @@ Haiku for quick reads of a capture, Sonnet where the writing matters. Every call
 so the monthly bill can be checked at /admin/costs.
 """
 
+import json
 import os
 from datetime import datetime
 
@@ -46,18 +47,22 @@ def _record_cost(model: str, usage) -> None:
 
 
 def _call(model: str, system: str, prompt: str, schema: dict, max_tokens: int = 600) -> dict:
-    """Forces Claude to answer through one tool, so the reply is always the shape we asked for."""
-    tool = {"name": "reply", "description": "Give the answer.", "input_schema": schema}
+    """Asks for JSON that matches the schema (structured outputs), so the reply is always the shape we asked for.
+
+    Forced tool use isn't supported on the newest models, so this uses output_config instead.
+    """
     msg = client().messages.create(
         model=model, max_tokens=max_tokens, system=f"{WHO}\n\n{system}",
         messages=[{"role": "user", "content": prompt}],
-        tools=[tool], tool_choice={"type": "tool", "name": "reply"},
+        output_config={"format": {"type": "json_schema", "schema": schema}},
     )
     _record_cost(model, msg.usage)
-    for block in msg.content:
-        if block.type == "tool_use":
-            return block.input
-    raise RuntimeError("Claude gave no reply")
+    if msg.stop_reason in ("refusal", "max_tokens"):
+        raise RuntimeError(f"Claude stopped early: {msg.stop_reason}")
+    text = next((b.text for b in msg.content if b.type == "text"), None)
+    if text is None:
+        raise RuntimeError("Claude gave no reply")
+    return json.loads(text)
 
 
 def _when_line(t: datetime) -> str:
@@ -65,7 +70,8 @@ def _when_line(t: datetime) -> str:
 
 
 def _obj(props: dict, required: list[str] | None = None) -> dict:
-    return {"type": "object", "properties": props, "required": required or list(props)}
+    return {"type": "object", "properties": props, "required": required or list(props),
+            "additionalProperties": False}
 
 
 S = {"type": "string"}
